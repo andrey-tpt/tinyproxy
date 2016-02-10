@@ -295,6 +295,28 @@ static int send_ssl_response (struct conn_s *connptr)
                               "\r\n", SSL_CONNECTION_RESPONSE, PROXY_AGENT);
 }
 
+static void log_headers (hashmap_t map) {
+    char *header_key, *header_value, *line, *tmp;
+    char *message = (char *) safecalloc(1, 1);
+    int linelen;
+    hashmap_iter iter;
+
+    iter = hashmap_first (map);
+    if (iter >= 0) {
+        for (; !hashmap_is_end (map, iter); ++iter) {
+            hashmap_return_entry (map, iter, &header_key, (void **) &header_value);
+            linelen = strlen(header_key) + strlen(header_value) + 7;
+            line = (char *) safemalloc(linelen);
+            snprintf(line, linelen, "%s -> %s \n", header_key, header_value);
+            tmp = (char *) saferealloc(message, strlen(message) + linelen);
+            message = strncat(tmp, line, linelen);
+            free(line);
+        }
+        log_message (LOG_CONN, "%s", message);
+    }
+    free(message);
+}
+
 /*
  * Break the request line apart and figure out where to connect and
  * build a new request line. Finally connect to the remote server.
@@ -889,6 +911,7 @@ process_client_headers (struct conn_s *connptr, hashmap_t hashofheaders)
                 goto PULL_CLIENT_DATA;
         }
 
+        log_headers (hashofheaders);
         /*
          * Output all the remaining headers to the remote machine.
          */
@@ -1093,6 +1116,8 @@ retry:
         }
 #endif
 
+        log_headers (hashofheaders);
+
         /*
          * All right, output all the remaining headers to the client.
          */
@@ -1108,6 +1133,7 @@ retry:
                                 goto ERROR_EXIT;
                 }
         }
+
         hashmap_delete (hashofheaders);
 
         /* Write the final blank line to signify the end of the headers */
