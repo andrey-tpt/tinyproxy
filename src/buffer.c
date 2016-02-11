@@ -204,6 +204,10 @@ static struct bufline_s *remove_from_buffer (struct buffer_s *buffptr)
         return line;
 }
 
+static void log_line (unsigned char *marker, struct bufline_s *line) {
+        log_message (LOG_CONN, "%s -> %s", marker, line->string);
+}
+
 /*
  * Reads the bytes from the socket, and adds them to the buffer.
  * Takes a connection and returns the number of bytes read.
@@ -268,10 +272,11 @@ ssize_t read_buffer (int fd, struct buffer_s * buffptr)
  * Write the bytes in the buffer to the socket.
  * Takes a connection and returns the number of bytes written.
  */
-ssize_t write_buffer (int fd, struct buffer_s * buffptr)
+ssize_t write_buffer (unsigned char *marker, int fd, struct buffer_s * buffptr)
 {
         ssize_t bytessent;
         struct bufline_s *line;
+        struct bufline_s *tmp;
 
         assert (fd >= 0);
         assert (buffptr != NULL);
@@ -291,7 +296,9 @@ ssize_t write_buffer (int fd, struct buffer_s * buffptr)
                 /* bytes sent, adjust buffer */
                 line->pos += bytessent;
                 if (line->pos == line->length)
-                        free_line (remove_from_buffer (buffptr));
+                        tmp = remove_from_buffer (buffptr);
+                        log_line (marker, tmp);
+                        free_line (tmp);
                 return bytessent;
         } else {
                 switch (errno) {
@@ -319,3 +326,5 @@ ssize_t write_buffer (int fd, struct buffer_s * buffptr)
                 }
         }
 }
+
+

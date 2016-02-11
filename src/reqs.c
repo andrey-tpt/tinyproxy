@@ -1240,11 +1240,11 @@ static void relay_connection (struct conn_s *connptr)
                         break;
                 }
                 if (FD_ISSET (connptr->server_fd, &wset)
-                    && write_buffer (connptr->server_fd, connptr->cbuffer) < 0) {
+                    && write_buffer ("Request", connptr->server_fd, connptr->cbuffer) < 0) {
                         break;
                 }
                 if (FD_ISSET (connptr->client_fd, &wset)
-                    && write_buffer (connptr->client_fd, connptr->sbuffer) < 0) {
+                    && write_buffer ("Repsonse", connptr->client_fd, connptr->sbuffer) < 0) {
                         break;
                 }
         }
@@ -1262,7 +1262,7 @@ static void relay_connection (struct conn_s *connptr)
         }
 
         while (buffer_size (connptr->sbuffer) > 0) {
-                if (write_buffer (connptr->client_fd, connptr->sbuffer) < 0)
+                if (write_buffer ("Response", connptr->client_fd, connptr->sbuffer) < 0)
                         break;
         }
         shutdown (connptr->client_fd, SHUT_WR);
@@ -1279,7 +1279,7 @@ static void relay_connection (struct conn_s *connptr)
         }
 
         while (buffer_size (connptr->cbuffer) > 0) {
-                if (write_buffer (connptr->server_fd, connptr->cbuffer) < 0)
+                if (write_buffer ("Request", connptr->server_fd, connptr->cbuffer) < 0)
                         break;
         }
 

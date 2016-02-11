@@ -35,6 +35,6 @@ extern int add_to_buffer (struct buffer_s *buffptr, unsigned char *data,
                           size_t length);
 
 extern ssize_t read_buffer (int fd, struct buffer_s *buffptr);
-extern ssize_t write_buffer (int fd, struct buffer_s *buffptr);
+extern ssize_t write_buffer (unsigned char *marker, int fd, struct buffer_s *buffptr);
 
 #endif /* __BUFFER_H_ */
