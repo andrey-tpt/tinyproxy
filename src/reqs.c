@@ -858,7 +858,8 @@ process_client_headers (struct conn_s *connptr, hashmap_t hashofheaders)
                 "proxy-connection",
                 "te",
                 "trailers",
-                "upgrade"
+                "upgrade",
+                "Accept-Encoding"
         };
         int i;
         hashmap_iter iter;
